@@ -6,51 +6,63 @@
 
 <div class="container mt-4">
     <h1 class="mb-4">CS35 Blog Posts</h1>
-    
-    <div class="row">
-        @foreach (var post in Model)
+    <div id="search-status"></div>
+    <div class="row" id="post-list">
+        @if (!Model.Any())
         {
-            <div class="col-md-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <a asp-action="Details" asp-route-id="@post.Id">@post.Title</a>
-                        </h5>
-                        <p class="card-text text-muted">By @post.Author</p>
-                        <p class="card-text">@post.Content.Substring(0, Math.Min(100, post.Content.Length))...</p>
-                        <a asp-action="Details" asp-route-id="@post.Id" class="btn btn-primary btn-sm">Read More</a>
-                    </div>
-                </div>
+            <div class="col-12">
+                <div class="alert alert-warning">No posts found matching your search.</div>
             </div>
         }
-    </div>
-
-    <div class="mt-4">
-        <h3>All Posts Table</h3>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var post in Model)
-                {
-                    <tr>
-                        <td>@post.Id</td>
-                        <td>
-                            <a asp-action="Details" asp-route-id="@post.Id">@post.Title</a>
-                        </td>
-                        <td>@post.Author</td>
-                        <td>
-                            <a asp-action="Details" asp-route-id="@post.Id" class="btn btn-sm btn-info">View Details</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        else
+        {
+            foreach (var post in Model)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a asp-action="Details" asp-route-id="@post.Id">@post.Title</a>
+                            </h5>
+                            <p class="card-text text-muted">By @post.Author</p>
+                            <p class="card-text">@post.Content.Substring(0, Math.Min(100, post.Content.Length))...</p>
+                            <a asp-action="Details" asp-route-id="@post.Id" class="btn btn-primary btn-sm">Read More</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
     </div>
 </div>
+<script>
+window.addEventListener('navbarSearch', function(e) {
+    var query = e.detail;
+    var status = document.getElementById('search-status');
+    var postList = document.getElementById('post-list');
+    if (status) status.innerHTML = query ? `Showing results for <strong>${query}</strong>` : '';
+    fetch(`/Blog/Search?search=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(posts => {
+            let html = '';
+            if (!posts.length) {
+                html = `<div class="col-12"><div class="alert alert-warning">No posts found matching your search.</div></div>`;
+            } else {
+                posts.forEach(post => {
+                    html += `<div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <a href='/Blog/Details/${post.id}'>${post.title}</a>
+                                </h5>
+                                <p class="card-text text-muted">By ${post.author}</p>
+                                <p class="card-text">${post.content.substring(0, 100)}...</p>
+                                <a href='/Blog/Details/${post.id}' class="btn btn-primary btn-sm">Read More</a>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            }
+            postList.innerHTML = html;
+        });
+});
+</script>

@@ -38,6 +38,21 @@
                         <a class="nav-link" asp-controller="Blog" asp-action="Index">All Posts</a>
                     </li>
                 </ul>
+                <form class="d-flex ms-3" method="get" asp-controller="Blog" asp-action="Index" role="search">
+                    <input id="navbar-search" class="form-control me-2" type="search" name="search" placeholder="Search posts..." aria-label="Search" autocomplete="off">
+                </form>
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var searchInput = document.getElementById('navbar-search');
+                    if (searchInput) {
+                        searchInput.addEventListener('keyup', function() {
+                            // Custom event for search, handled in Index view
+                            var event = new CustomEvent('navbarSearch', { detail: searchInput.value });
+                            window.dispatchEvent(event);
+                        });
+                    }
+                });
+                </script>
             </div>
         </div>
     </nav>
